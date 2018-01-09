@@ -116,11 +116,16 @@ _docker_compose_build() {
 			__docker_compose_nospace
 			return
 			;;
+		--label)
+			COMPREPLY=( $( compgen -e -- "$cur" ) )
+			__docker_compose_nospace
+			return
+			;;
 	esac
 
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--build-arg --force-rm --help --memory --no-cache --pull" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--build-arg --force-rm --help --label --memory --no-cache --pull" -- "$cur" ) )
 			;;
 		*)
 			__docker_compose_services_from_build
