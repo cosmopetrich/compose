@@ -12,3 +12,4 @@ from .config import merge_labels
 from .config import parse_environment
 from .config import parse_labels
 from .config import resolve_build_args
+from .config import resolve_labels

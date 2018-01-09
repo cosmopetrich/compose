@@ -653,6 +653,11 @@ def resolve_build_args(buildargs, environment):
     return dict(resolve_env_var(k, v, environment) for k, v in six.iteritems(args))
 
 
+def resolve_labels(labels, environment):
+    args = parse_labels(labels)
+    return dict(resolve_env_var(k, v, environment) for k, v in six.iteritems(args))
+
+
 def validate_extended_service_dict(service_dict, filename, service):
     error_prefix = "Cannot extend service '%s' in %s:" % (service, filename)
 

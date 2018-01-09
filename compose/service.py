@@ -934,7 +934,8 @@ class Service(object):
 
         return [build_spec(secret) for secret in self.secrets]
 
-    def build(self, no_cache=False, pull=False, force_rm=False, memory=None, build_args_override=None):
+    def build(self, no_cache=False, pull=False, force_rm=False, memory=None, build_args_override=None,
+              labels_override=None):
         log.info('Building %s' % self.name)
 
         build_opts = self.options.get('build', {})
@@ -942,6 +943,10 @@ class Service(object):
         build_args = build_opts.get('args', {}).copy()
         if build_args_override:
             build_args.update(build_args_override)
+
+        labels = build_opts.get('labels', {}).copy()
+        if labels_override:
+            labels.update(labels_override)
 
         # python2 os.stat() doesn't support unicode on some UNIX, so we
         # encode it to a bytestring to be safe
@@ -959,7 +964,7 @@ class Service(object):
             nocache=no_cache,
             dockerfile=build_opts.get('dockerfile', None),
             cache_from=build_opts.get('cache_from', None),
-            labels=build_opts.get('labels', None),
+            labels=labels,
             buildargs=build_args,
             network_mode=build_opts.get('network', None),
             target=build_opts.get('target', None),

@@ -26,6 +26,7 @@ from ..config import ConfigurationError
 from ..config import parse_environment
 from ..config import parse_labels
 from ..config import resolve_build_args
+from ..config import resolve_labels
 from ..config.environment import Environment
 from ..config.serialize import serialize_config
 from ..config.types import VolumeSpec
@@ -227,7 +228,7 @@ class TopLevelCommand(object):
         e.g. `composetest_db`. If you change a service's `Dockerfile` or the
         contents of its build directory, you can run `docker-compose build` to rebuild it.
 
-        Usage: build [options] [--build-arg key=val...] [SERVICE...]
+        Usage: build [options] [--build-arg key=val...] [--label key=val...] [SERVICE...]
 
         Options:
             --force-rm              Always remove intermediate containers.
@@ -235,15 +236,21 @@ class TopLevelCommand(object):
             --pull                  Always attempt to pull a newer version of the image.
             -m, --memory MEM        Sets memory limit for the bulid container.
             --build-arg key=val     Set build-time variables for one service.
+            --label key=val         Set build-time image labels.
         """
         service_names = options['SERVICE']
         build_args = options.get('--build-arg', None)
-        if build_args:
-            environment = Environment.from_env_file(self.project_dir)
-            build_args = resolve_build_args(build_args, environment)
+        labels = options.get('--label', None)
 
         if not service_names and build_args:
             raise UserError("Need service name for --build-arg option")
+
+        if build_args or labels:
+            environment = Environment.from_env_file(self.project_dir)
+        if build_args:
+            build_args = resolve_build_args(build_args, environment)
+        if labels:
+            labels = resolve_labels(labels, environment)
 
         self.project.build(
             service_names=service_names,
@@ -251,7 +258,8 @@ class TopLevelCommand(object):
             pull=bool(options.get('--pull', False)),
             force_rm=bool(options.get('--force-rm', False)),
             memory=options.get('--memory'),
-            build_args=build_args)
+            build_args=build_args,
+            labels=labels)
 
     def bundle(self, config_options, options):
         """
